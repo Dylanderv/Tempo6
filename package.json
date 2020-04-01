@@ -1,0 +1,29 @@
+{
+  "name": "tempo4",
+  "version": "1.0.0",
+  "description": "Tempo4",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "parcel src/index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dylanderv/Tempo4.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dylanderv/Tempo4/issues"
+  },
+  "homepage": "https://github.com/Dylanderv/Tempo4#readme",
+  "dependencies": {
+    "@material/mwc-top-app-bar-fixed": "^0.14.1",
+    "sling-web-component-input": "^1.12.5"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "sass": "^1.26.3",
+    "typescript": "^3.8.3"
+  }
+}

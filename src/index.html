@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="./style.scss" />
+</head>
+<body>
+  <div class="container">
+    <div class="webflow-style-input">
+      <input id="searchInput" type="text" placeholder="Recherche"></input>
+    </div>
+  </div>
+  <div id="mainDiv">
+    <template id="cardTemplate">
+      <!-- Add card type for color -->
+      <figure hidden class="card"> 
+        <div class="card__image-container">
+          <!-- change src and alt -->
+          <img src="" alt="" class="card__image">   
+        </div>
+        
+        <figcaption class="card__caption">
+          <!-- Add name -->
+          <h1 class="card__name"></h1>
+          <!-- Add type/id -->
+          <h3 class="card__type"></h3>
+          <!-- Add tr for each value needed -->
+          <table class="card__stats">
+          </table>
+          <!-- no need right now -->
+          <!-- <div class="card__abilities">
+            <h4 class="card__ability">
+              <span class="card__label">Ability</span>
+              {{ability1}}
+            </h4>
+            <h4 class="card__ability">
+              <span class="card__label">Hidden Ability</span>
+              {{ability2}}
+            </h4>
+          </div> -->
+        </figcaption>
+      </figure>
+    </template>
+  </div>
+  <script src="script.ts"></script>
+</body>
+</html>
