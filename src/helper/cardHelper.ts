@@ -23,7 +23,7 @@ export async function createCard(mobInfo: IMobInfos, mainElement: HTMLElement) {
       cardLevel.textContent = `Niv. ${mobInfo.level.min} - ${mobInfo.level.max}`;
     }
     cardImg.setAttribute("alt", "Image du mob");
-    cardImg.setAttribute("src", `Tempo4/${mobInfo.id}.png`);
+    cardImg.setAttribute("src", `${mobInfo.id}.png`);
 
     processMobDrop(cardDropInfo, mobInfo.temporisDrops, mobInfo.name);
 
