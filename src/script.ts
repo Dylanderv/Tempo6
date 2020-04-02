@@ -67,16 +67,18 @@ function search(searchInput: string) {
   if (searchInput.length < 4) {
     searchInput = ""
   }
-  selectedData = dropData.filter(elem => {
-    return elem.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())
+  let aaa
+  selectedData = dropData.filter(elem => { 
+    return (elem.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase()))
             ||
-            useClassicDrop ? elem.drops.filter(item => 
-              item.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())
-            ).length > 0 : false
+            (elem.temporisDrops.find(item => {
+              return item.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())
+            }))
             ||
-            elem.temporisDrops.filter(item => 
+            (useClassicDrop ? elem.drops.find(item => 
               item.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())
-            ).length > 0
+            ) : false)
+            
   })
   startCard = 0;
   deleteCards();

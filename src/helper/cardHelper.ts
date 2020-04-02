@@ -66,15 +66,38 @@ function handleGradeChance(drop: dropInfo, mobGrades: Grades[], classColor: stri
   let gradeToDisplay: {startGrade: number, endGrade: number}[] = [];
   let startGrade = 1;
   for (let i = 0; i < drop.chance.length; i++) {
-    if (drop.chance.find(dr => dr.grade === startGrade).chance !== drop.chance[i].chance) {
+    if (!drop.chance[i].chance && drop.chance.find(dr => dr.grade === startGrade).chance) {
       gradeToDisplay.push({
         startGrade,
         endGrade: drop.chance[i].grade - 1
       });
       startGrade = drop.chance[i].grade;
+    } else if (!drop.chance[i].chance && !drop.chance.find(dr => dr.grade === startGrade).chance) {
+      if (i === drop.chance.length -1) {
+        gradeToDisplay.push({
+          startGrade,
+          endGrade: drop.chance[i].grade - 1
+        });
+        startGrade = drop.chance[i].grade;
+      }
+    } else if (drop.chance[i].chance && !drop.chance.find(dr => dr.grade === startGrade).chance) {
+      gradeToDisplay.push({
+        startGrade,
+        endGrade: drop.chance[i].grade - 1
+      });
+      startGrade = drop.chance[i].grade;
+    } else {
+      if (drop.chance.find(dr => dr.grade === startGrade).chance !== drop.chance[i].chance) {
+        gradeToDisplay.push({
+          startGrade,
+          endGrade: drop.chance[i].grade - 1
+        });
+        startGrade = drop.chance[i].grade;
+      }
     }
   }
   if (gradeToDisplay.length === 0) {
+    
     gradeToDisplay.push({
       startGrade: 1,
       endGrade: 5
@@ -86,7 +109,7 @@ function handleGradeChance(drop: dropInfo, mobGrades: Grades[], classColor: stri
   } else {
     let sum = 0;
     for (let i = 0; i < gradeToDisplay.length; i++) {
-      sum += drop.chance.find( dr => dr.grade === gradeToDisplay[i].startGrade).chance;
+      sum += drop.chance.find( dr => dr.grade === gradeToDisplay[i].startGrade).chance ? drop.chance.find( dr => dr.grade === gradeToDisplay[i].startGrade).chance : 0;
     }
     let moy = sum / gradeToDisplay.length;
     let tableDrop = `<table>`;
@@ -106,10 +129,10 @@ function handleGradeChance(drop: dropInfo, mobGrades: Grades[], classColor: stri
         tableDrop += `
           <tr>
             <th>
-              Niv. ${mobGrades.find(gr => gr.grade === grade.startGrade).level} - ${mobGrades.find(gr => gr.grade === grade.endGrade).level}
+              Niv. ${mobGrades.find(gr => gr.grade === grade.startGrade).level} à ${mobGrades.find(gr => gr.grade === grade.endGrade).level}
             <th>
             <td>
-              ${drop.chance.find(dr => dr.grade === grade.startGrade).chance.toFixed(2)}%
+              ${drop.chance.find(dr => dr.grade === grade.startGrade).chance ? drop.chance.find( dr => dr.grade === grade.startGrade).chance.toFixed(2) : 0}%
             <td>
           <tr>
         `
