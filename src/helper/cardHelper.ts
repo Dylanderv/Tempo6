@@ -1,20 +1,22 @@
-import { IMobInfos, dropInfo } from "../model/IMobInfos";
+import { IMobInfos, dropInfo, Grades } from "../model/IMobInfos";
 // import images from "../mobImages/*.png";
 import { randomCardClassColorEnum } from "../model/CardClassColorEnum";
 
-export async function createCard(mobInfo: IMobInfos, mainElement: HTMLElement) {
+export async function createCard(mobInfo: IMobInfos, mainElement: HTMLElement, useDropClassic: boolean) {
   if ("content" in document.createElement("template")) {
     const template = document.getElementById("cardTemplate") as HTMLTemplateElement;
     let clone = document.importNode(template.content, true);
 
     let figure = clone.querySelector(".card");
-    figure.classList.add(randomCardClassColorEnum());
+    let classColor = randomCardClassColorEnum()
+    figure.classList.add(classColor);
     figure.setAttribute("id", mobInfo.id);
 
     let cardName = clone.querySelector(".card__name");
     let cardLevel = clone.querySelector(".card__type");
     let cardImg = clone.querySelector(".card__image");
-    let cardDropInfo = clone.querySelector(".card__stats") as HTMLTableElement;
+    let cardTemporisDropInfo = clone.querySelector(".card__stats") as HTMLTableElement;
+    let cardDropInfo = clone.querySelector(".card__stats2") as HTMLTableElement;
 
     cardName.innerHTML = mobInfo.name;
     if (mobInfo.level.type === "simple") {
@@ -25,7 +27,14 @@ export async function createCard(mobInfo: IMobInfos, mainElement: HTMLElement) {
     cardImg.setAttribute("alt", "Image du mob");
     cardImg.setAttribute("src", `${mobInfo.id}.png`);
 
-    processMobDrop(cardDropInfo, mobInfo.temporisDrops, mobInfo.name);
+    processMobDrop(cardTemporisDropInfo, mobInfo.temporisDrops, mobInfo.name, mobInfo.grades, classColor);
+    if (useDropClassic) {
+      clone.getElementById("dropClassicTitle").hidden = false
+      processMobDrop(cardDropInfo, mobInfo.drops, mobInfo.name, mobInfo.grades, classColor);
+    } else {
+      clone.getElementById("dropClassicTitle").hidden = true
+    }
+
 
     mainElement.append(clone)
 
@@ -34,7 +43,7 @@ export async function createCard(mobInfo: IMobInfos, mainElement: HTMLElement) {
   }
 }
 
-function processMobDrop(tableElement: HTMLTableElement, dropInfos: dropInfo[], name: string) {
+function processMobDrop(tableElement: HTMLTableElement, dropInfos: dropInfo[], name: string, mobGrades: Grades[], classColor: string) {
   //  <tr>
   //   <th>nom item</th>
   //   <td>chances</td>
@@ -45,7 +54,7 @@ function processMobDrop(tableElement: HTMLTableElement, dropInfos: dropInfo[], n
     let td = document.createElement("td");
 
     th.innerHTML = drop.name;
-    td.textContent = handleGradeChance(drop, name);
+    td.innerHTML = handleGradeChance(drop, mobGrades, classColor);
 
     tr.append(th);
     tr.append(td);
@@ -53,7 +62,7 @@ function processMobDrop(tableElement: HTMLTableElement, dropInfos: dropInfo[], n
   })
 }
 
-function handleGradeChance(drop: dropInfo, name: string) {
+function handleGradeChance(drop: dropInfo, mobGrades: Grades[], classColor: string) {
   let gradeToDisplay: {startGrade: number, endGrade: number}[] = [];
   let startGrade = 1;
   for (let i = 0; i < drop.chance.length; i++) {
@@ -75,11 +84,52 @@ function handleGradeChance(drop: dropInfo, name: string) {
   if (gradeToDisplay.length === 1) {
     return `${(drop.chance[0].chance.toFixed(2)).toString()}%`;
   } else {
-    return "WIP"
+    let sum = 0;
+    for (let i = 0; i < gradeToDisplay.length; i++) {
+      sum += drop.chance.find( dr => dr.grade === gradeToDisplay[i].startGrade).chance;
+    }
+    let moy = sum / gradeToDisplay.length;
+    let tableDrop = `<table>`;
+    gradeToDisplay.forEach(grade => {
+      if (grade.startGrade === grade.endGrade) {
+        tableDrop += `
+          <tr>
+            <th>
+              Niv. ${mobGrades.find(gr => gr.grade === grade.startGrade).level}
+            <th>
+            <td>
+              ${drop.chance.find(dr => dr.grade === grade.startGrade).chance.toFixed(2)}%
+            <td>
+          <tr>
+        `
+      } else {
+        tableDrop += `
+          <tr>
+            <th>
+              Niv. ${mobGrades.find(gr => gr.grade === grade.startGrade).level} - ${mobGrades.find(gr => gr.grade === grade.endGrade).level}
+            <th>
+            <td>
+              ${drop.chance.find(dr => dr.grade === grade.startGrade).chance.toFixed(2)}%
+            <td>
+          <tr>
+        `
+      }
+    })
+    tableDrop += "</table>";
+    let cl = classColor.substr(6, classColor.length) + "Background"
+    let tooltip = `
+    <div class="tooltip">≈${moy.toFixed(2)}% (?)
+      <span class="tooltiptext">
+        <span class="tooltiptextcontent ${cl}">${tableDrop}</span>
+      </span>
+    </div>
+  `
+    return tooltip;
   }
+
 }
 
-export function hideUnused(allData: IMobInfos[], selectedData: IMobInfos[], searchInput: string) {
+export function hideUnused(allData: IMobInfos[], selectedData: IMobInfos[], searchInput: string, useDropClassic: boolean) {
   let unused = allData.filter(data => selectedData.findIndex(elem => elem.id === data.id) === -1);
   unused.forEach(elem => document.getElementById(elem.id)?.classList.add("hidden"));
   selectedData.forEach(elem => {
@@ -95,28 +145,27 @@ export function hideUnused(allData: IMobInfos[], selectedData: IMobInfos[], sear
       // nameElement.innerHTML = nameElement.innerHTML.toString().split("<mark>").join("").split("</mark>").join("");
       nameElement.innerHTML = nameElement.innerHTML.toString().replace(regexSearch, (match) => `<mark>${match}</mark>`)
       // drop
-      let allDropElement = htmlElement.querySelector(".card__stats").children;
-      for (let i = 0; i < allDropElement.length; i++) {
-        let dropElement = allDropElement.item(i).querySelector("th")
+      let temporisDropElement = htmlElement.querySelector(".card__stats").children;
+      for (let i = 0; i < temporisDropElement.length; i++) {
+        let dropElement = temporisDropElement.item(i).querySelector("th")
         dropElement.innerHTML = dropElement.innerHTML.toString().replace(regexMarkStart, () => "")
         dropElement.innerHTML = dropElement.innerHTML.toString().replace(regexMarkEnd, () => "")
         // dropElement.innerHTML = dropElement.innerHTML.toString().split("<mark>").join("").split("</mark>").join("");
         dropElement.innerHTML = dropElement.innerHTML.toString().replace(regexSearch, (match) => `<mark>${match}</mark>`)
+      }
+      if (useDropClassic) {
+        let otherDropElement = htmlElement.querySelector(".card__stats2").children;
+        for (let i = 0; i < otherDropElement.length; i++) {
+          let dropElement = otherDropElement.item(i).querySelector("th")
+          dropElement.innerHTML = dropElement.innerHTML.toString().replace(regexMarkStart, () => "")
+          dropElement.innerHTML = dropElement.innerHTML.toString().replace(regexMarkEnd, () => "")
+          // dropElement.innerHTML = dropElement.innerHTML.toString().split("<mark>").join("").split("</mark>").join("");
+          dropElement.innerHTML = dropElement.innerHTML.toString().replace(regexSearch, (match) => `<mark>${match}</mark>`)
+        }
       }
 
       htmlElement.classList.remove("hidden")
 
     }
   });
-}
-
-// Compare string with case insensitive and return the matching string in stringToCompare
-function compareString(stringToCompare: string, comparator: string) {
-  let reg = new RegExp(comparator, 'i')
-  let num = stringToCompare.search(reg);
-  if (num !== -1) {
-    return stringToCompare.substr(num, comparator.length);
-  } else {
-    return ""
-  }
 }
