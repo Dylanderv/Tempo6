@@ -2,11 +2,23 @@ export interface IMobInfos {
   name: string;
   id: string;
   level: simpleLevelType | rangeLevelType,
-  drop: dropInfo[]
+  drops: dropInfo[],
+  temporisDrops: dropInfo[]
+  grades: Grades[]
+}
+
+export interface Grades {
+  grade: number,
+  level: number
 }
 
 export interface dropInfo {
   name: string,
+  chance: dropGradeChance[]
+}
+
+interface dropGradeChance {
+  grade: number,
   chance: number
 }
 

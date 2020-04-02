@@ -12,37 +12,52 @@
       <input id="searchInput" type="text" placeholder="Recherche"></input>
     </div>
   </div>
+  <div class="paging">
+    <a id="prevPage1" class="button4" style="background-color:#9a4ef1">Prev</a>
+    <span id="currentPage1"></span>/<span id="maxPage1"></span>
+    <a id="nextPage1" class="button4" style="background-color:#4e9af1">Next</a>
+  </div>
   <div id="mainDiv">
-    <template id="cardTemplate">
-      <!-- Add card type for color -->
-      <figure hidden class="card"> 
-        <div class="card__image-container">
-          <!-- change src and alt -->
-          <img src="" alt="" class="card__image">   
-        </div>
-        
-        <figcaption class="card__caption">
-          <!-- Add name -->
-          <h1 class="card__name"></h1>
-          <!-- Add type/id -->
-          <h3 class="card__type"></h3>
-          <!-- Add tr for each value needed -->
-          <table class="card__stats">
-          </table>
-          <!-- no need right now -->
-          <!-- <div class="card__abilities">
-            <h4 class="card__ability">
-              <span class="card__label">Ability</span>
-              {{ability1}}
-            </h4>
-            <h4 class="card__ability">
-              <span class="card__label">Hidden Ability</span>
-              {{ability2}}
-            </h4>
-          </div> -->
-        </figcaption>
-      </figure>
-    </template>
+    
+  </div>
+
+  <template id="cardTemplate">
+    <!-- Add card type for color -->
+    <figure hidden class="card"> 
+      <div class="card__image-container">
+        <!-- change src and alt -->
+        <img src="" alt="" class="card__image">   
+      </div>
+      
+      <figcaption class="card__caption">
+        <!-- Add name -->
+        <h1 class="card__name"></h1>
+        <!-- Add type/id -->
+        <h3 class="card__type"></h3>
+        <!-- Add tr for each value needed -->
+        <table class="card__stats">
+        </table>
+        <!-- no need right now -->
+        <!-- <div class="card__abilities">
+          <h4 class="card__ability">
+            <span class="card__label">Ability</span>
+            {{ability1}}
+          </h4>
+          <h4 class="card__ability">
+            <span class="card__label">Hidden Ability</span>
+            {{ability2}}
+          </h4>
+        </div> -->
+      </figcaption>
+    </figure>
+  </template>
+  <div class="paging">
+    <span id="numRes"></span> résultats
+  </div>
+  <div class="paging">
+    <a id="prevPage2" class="button4" style="background-color:#9a4ef1">Prev</a>
+    <span id="currentPage2"></span>/<span id="maxPage2"></span>
+    <a id="nextPage2" class="button4" style="background-color:#4e9af1">Next</a>
   </div>
   <script src="script.ts"></script>
 </body>

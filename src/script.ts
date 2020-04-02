@@ -3,28 +3,103 @@ import { getDropDataFromJson } from "./helper/dropDataHelper"
 
 const mainDiv = document.getElementById("mainDiv") as HTMLDivElement;
 const searchField = document.getElementById("searchInput") as HTMLInputElement;
+const prevPage1 = document.getElementById("prevPage1") as HTMLButtonElement;
+const nextPage1 = document.getElementById("nextPage1") as HTMLButtonElement;
+const prevPage2 = document.getElementById("prevPage2") as HTMLButtonElement;
+const nextPage2 = document.getElementById("nextPage2") as HTMLButtonElement;
+const currentPage1 = document.getElementById("currentPage1") as HTMLSpanElement;
+const currentPage2 = document.getElementById("currentPage2") as HTMLSpanElement;
+const maxPage1 = document.getElementById("maxPage1") as HTMLSpanElement;
+const maxPage2 = document.getElementById("maxPage2") as HTMLSpanElement;
+const numRes = document.getElementById("numRes") as HTMLSpanElement;
 
 const dropData = getDropDataFromJson();
 let selectedData = dropData
 
+let displayedCard = 50;
+let startCard = 0;
+
 createCards();
 
-searchField.addEventListener("input", () => {
+function nextPage() {
+  startCard += displayedCard;
+  if (startCard > selectedData.length) {
+    startCard -= displayedCard
+  }
+  window.scrollTo(0,0);
+  deleteCards();
+  createCards();
+}
+
+function prevPage() {
+  startCard -= displayedCard;
+  if (startCard < 0) {
+    startCard = 0;
+  }
+  window.scrollTo(0,0);
+  deleteCards();
+  createCards();
+}
+
+nextPage1.addEventListener("click", debounce(() => nextPage(), 50))
+nextPage2.addEventListener("click", debounce(() => nextPage(), 50))
+
+prevPage1.addEventListener("click", debounce(() => prevPage(), 50))
+prevPage2.addEventListener("click", debounce(() => prevPage(), 50))
+
+searchField.addEventListener("input", debounce(() => {
   search(searchField.value)
-})
+}, 250))
+
 
 function search(searchInput: string) {
+  if (searchInput.length < 4) {
+    searchInput = ""
+  }
   selectedData = dropData.filter(elem => {
     return elem.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())
             ||
-            elem.drop.filter(item => 
+            // elem.drops.filter(item => 
+            //   item.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())
+            // ).length > 0
+            // ||
+            elem.temporisDrops.filter(item => 
               item.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())
             ).length > 0
   })
-  console.log(selectedData.length, dropData.length);
-  hideUnused(dropData, selectedData, searchInput);
+  startCard = 0;
+  deleteCards();
+  createCards();
 }
 
+function debounce(func, wait) {
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    var later = function() {
+      timeout = null;
+      func.apply(context, args);
+    };
+    var callNow = false && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+};
+
 function createCards() {
-  selectedData.forEach(elem => createCard(elem, mainDiv));
+  currentPage1.innerText = Math.ceil((startCard / displayedCard) + 1).toString();
+  currentPage2.innerText = Math.ceil((startCard / displayedCard) + 1).toString();
+  maxPage1.innerText = Math.ceil((selectedData.length / displayedCard)).toString();
+  maxPage2.innerText = Math.ceil((selectedData.length / displayedCard)).toString();
+  numRes.innerText = selectedData.length.toString();
+
+  for (let i = startCard; i < displayedCard + startCard; i++) {
+    if (selectedData[i]) createCard(selectedData[i], mainDiv)
+  }
+  hideUnused(dropData, selectedData, searchField.value);
+}
+
+function deleteCards() {
+  document.getElementById("mainDiv").innerHTML = "";
 }

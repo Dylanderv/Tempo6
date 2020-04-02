@@ -1,5 +1,5 @@
 import { IMobInfos, dropInfo } from "../model/IMobInfos";
-import images from "../mobImages/*.png";
+// import images from "../mobImages/*.png";
 import { randomCardClassColorEnum } from "../model/CardClassColorEnum";
 
 export async function createCard(mobInfo: IMobInfos, mainElement: HTMLElement) {
@@ -23,9 +23,9 @@ export async function createCard(mobInfo: IMobInfos, mainElement: HTMLElement) {
       cardLevel.textContent = `Niv. ${mobInfo.level.min} - ${mobInfo.level.max}`;
     }
     cardImg.setAttribute("alt", "Image du mob");
-    cardImg.setAttribute("src", images[mobInfo.id]);
+    cardImg.setAttribute("src", `${mobInfo.id}.png`);
 
-    processMobDrop(cardDropInfo, mobInfo.drop);
+    processMobDrop(cardDropInfo, mobInfo.temporisDrops, mobInfo.name);
 
     mainElement.append(clone)
 
@@ -34,7 +34,7 @@ export async function createCard(mobInfo: IMobInfos, mainElement: HTMLElement) {
   }
 }
 
-function processMobDrop(tableElement: HTMLTableElement, dropInfos: dropInfo[]) {
+function processMobDrop(tableElement: HTMLTableElement, dropInfos: dropInfo[], name: string) {
   //  <tr>
   //   <th>nom item</th>
   //   <td>chances</td>
@@ -45,7 +45,7 @@ function processMobDrop(tableElement: HTMLTableElement, dropInfos: dropInfo[]) {
     let td = document.createElement("td");
 
     th.innerHTML = drop.name;
-    td.textContent = `${drop.chance.toString()}%`;
+    td.textContent = handleGradeChance(drop, name);
 
     tr.append(th);
     tr.append(td);
@@ -53,21 +53,70 @@ function processMobDrop(tableElement: HTMLTableElement, dropInfos: dropInfo[]) {
   })
 }
 
+function handleGradeChance(drop: dropInfo, name: string) {
+  let gradeToDisplay: {startGrade: number, endGrade: number}[] = [];
+  let startGrade = 1;
+  for (let i = 0; i < drop.chance.length; i++) {
+    if (drop.chance.find(dr => dr.grade === startGrade).chance !== drop.chance[i].chance) {
+      gradeToDisplay.push({
+        startGrade,
+        endGrade: drop.chance[i].grade - 1
+      });
+      startGrade = drop.chance[i].grade;
+    }
+  }
+  if (gradeToDisplay.length === 0) {
+    gradeToDisplay.push({
+      startGrade: 1,
+      endGrade: 5
+    });
+  }
+
+  if (gradeToDisplay.length === 1) {
+    return `${(drop.chance[0].chance.toFixed(2)).toString()}%`;
+  } else {
+    return "WIP"
+  }
+}
+
 export function hideUnused(allData: IMobInfos[], selectedData: IMobInfos[], searchInput: string) {
   let unused = allData.filter(data => selectedData.findIndex(elem => elem.id === data.id) === -1);
-  unused.forEach(elem => document.getElementById(elem.id).classList.add("hidden"));
+  unused.forEach(elem => document.getElementById(elem.id)?.classList.add("hidden"));
   selectedData.forEach(elem => {
     let htmlElement = document.getElementById(elem.id)
-    // name
-    // let nameElement = htmlElement.querySelector(".card__name");
-    // console.log(nameElement)
-    // nameElement.innerHTML.
-    // let nameSplittedBySearch = nameElement.innerHTML.toString().split(searchInput);
-    // nameElement.innerHTML = nameSplittedBySearch.join(`<span class="underline">${searchInput}</span>`);
-    // drop
-    htmlElement.classList.remove("hidden")
+    if (htmlElement) {
+
+      let nameElement = htmlElement.querySelector(".card__name");
+      let regexSearch = new RegExp(searchInput, "gi");
+      let regexMarkStart = new RegExp("<mark>", "gi");
+      let regexMarkEnd = new RegExp("</mark>", "gi");
+      nameElement.innerHTML = nameElement.innerHTML.toString().replace(regexMarkStart, () => "")
+      nameElement.innerHTML = nameElement.innerHTML.toString().replace(regexMarkEnd, () => "")
+      // nameElement.innerHTML = nameElement.innerHTML.toString().split("<mark>").join("").split("</mark>").join("");
+      nameElement.innerHTML = nameElement.innerHTML.toString().replace(regexSearch, (match) => `<mark>${match}</mark>`)
+      // drop
+      let allDropElement = htmlElement.querySelector(".card__stats").children;
+      for (let i = 0; i < allDropElement.length; i++) {
+        let dropElement = allDropElement.item(i).querySelector("th")
+        dropElement.innerHTML = dropElement.innerHTML.toString().replace(regexMarkStart, () => "")
+        dropElement.innerHTML = dropElement.innerHTML.toString().replace(regexMarkEnd, () => "")
+        // dropElement.innerHTML = dropElement.innerHTML.toString().split("<mark>").join("").split("</mark>").join("");
+        dropElement.innerHTML = dropElement.innerHTML.toString().replace(regexSearch, (match) => `<mark>${match}</mark>`)
+      }
+
+      htmlElement.classList.remove("hidden")
+
+    }
   });
 }
 
-// // Compare string with case insensitive and return the matching string from
-// function compareString(stringToCompare: string, comparator: string)
+// Compare string with case insensitive and return the matching string in stringToCompare
+function compareString(stringToCompare: string, comparator: string) {
+  let reg = new RegExp(comparator, 'i')
+  let num = stringToCompare.search(reg);
+  if (num !== -1) {
+    return stringToCompare.substr(num, comparator.length);
+  } else {
+    return ""
+  }
+}

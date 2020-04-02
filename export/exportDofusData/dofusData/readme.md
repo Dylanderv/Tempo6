@@ -1,0 +1,1 @@
+dofus json data from d2o files (using PyDofus)
