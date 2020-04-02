@@ -12,9 +12,12 @@ const currentPage2 = document.getElementById("currentPage2") as HTMLSpanElement;
 const maxPage1 = document.getElementById("maxPage1") as HTMLSpanElement;
 const maxPage2 = document.getElementById("maxPage2") as HTMLSpanElement;
 const numRes = document.getElementById("numRes") as HTMLSpanElement;
+const classicDropCheckbox = document.getElementById("classicDropCheckbox") as HTMLInputElement;
+const paramButton = document.getElementById("settingButton") as HTMLButtonElement;
 
 const dropData = getDropDataFromJson();
 let selectedData = dropData
+let useClassicDrop = true;
 
 let displayedCard = 50;
 let startCard = 0;
@@ -41,6 +44,14 @@ function prevPage() {
   createCards();
 }
 
+paramButton.addEventListener("click", () => document.getElementById("settingsContent").hidden = !document.getElementById("settingsContent").hidden)
+
+classicDropCheckbox.addEventListener("click", () => {
+  useClassicDrop = classicDropCheckbox.checked;
+  deleteCards();
+  createCards();
+})
+
 nextPage1.addEventListener("click", debounce(() => nextPage(), 50))
 nextPage2.addEventListener("click", debounce(() => nextPage(), 50))
 
@@ -59,10 +70,10 @@ function search(searchInput: string) {
   selectedData = dropData.filter(elem => {
     return elem.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())
             ||
-            // elem.drops.filter(item => 
-            //   item.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())
-            // ).length > 0
-            // ||
+            useClassicDrop ? elem.drops.filter(item => 
+              item.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())
+            ).length > 0 : false
+            ||
             elem.temporisDrops.filter(item => 
               item.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())
             ).length > 0
@@ -95,9 +106,9 @@ function createCards() {
   numRes.innerText = selectedData.length.toString();
 
   for (let i = startCard; i < displayedCard + startCard; i++) {
-    if (selectedData[i]) createCard(selectedData[i], mainDiv)
+    if (selectedData[i]) createCard(selectedData[i], mainDiv, useClassicDrop)
   }
-  hideUnused(dropData, selectedData, searchField.value);
+  hideUnused(dropData, selectedData, searchField.value, useClassicDrop);
 }
 
 function deleteCards() {
