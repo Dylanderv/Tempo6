@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "parcel src/index.html",
-    "build-gh-pages": "rm -rf dist && parcel build src/index.html --public-url /Tempo4"
+    "build-gh-pages": "rm -rf dist && parcel build src/index.html --public-url /Tempo6"
   },
   "repository": {
     "type": "git",
